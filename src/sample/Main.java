@@ -12,6 +12,8 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("viewFX/view/authorization.fxml"));
         primaryStage.setTitle("BugTracing");
+        primaryStage.setFullScreen(false);
+        primaryStage.setResizable(false);
         Scene scene = new Scene(root, 700, 450);
         primaryStage.setScene(scene);
         primaryStage.show();

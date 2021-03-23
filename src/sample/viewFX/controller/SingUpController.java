@@ -1,12 +1,14 @@
 package sample.viewFX.controller;
 
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
 
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import sample.connectionDB.DataBaseHandler;
+import sample.entity.User;
 
 public class SingUpController {
 
@@ -17,20 +19,30 @@ public class SingUpController {
     private URL location;
 
     @FXML
-    private Button singInButton;
+    private Button singUpCreateButton;
 
     @FXML
-    private TextField loginField;
+    private TextField singUpLoginField;
 
     @FXML
-    private PasswordField passwordField;
+    private TextField singUpPasswordField;
 
     @FXML
-    private Button singUpButton;
+    private TextField singUpNameField;
 
     @FXML
     void initialize() {
-
+        singUpCreateButton.setOnAction(event -> {
+            try {
+                DataBaseHandler.connect();
+                User user = new User(
+                        singUpLoginField.getText(),
+                        singUpPasswordField.getText(),
+                        singUpNameField.getText());
+                DataBaseHandler.createUser(user);
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        });
     }
 }
-
