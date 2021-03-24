@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="450.0" prefWidth="700.0" style="-fx-background-color: #2e3348;" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.viewFX.controller.HomeController">
+   <children>
+      <Label layoutX="274.0" layoutY="36.0" text="BugTracing" textFill="#f8f4f4">
+         <font>
+            <Font name="Times New Roman" size="36.0" />
+         </font>
+      </Label>
+      <MenuBar layoutY="78.0">
+        <menus>
+          <Menu mnemonicParsing="false" text="General">
+            <items>
+              <MenuItem fx:id="homeMenuItemUsers" mnemonicParsing="false" onAction="#showUsers" text="Users" />
+                  <MenuItem fx:id="homeMenuItemProject" mnemonicParsing="false" onAction="#showProjects" text="Projects" />
+                  <MenuItem fx:id="homeMenuItemTasks" mnemonicParsing="false" onAction="#showTasks" text="Tasks" />
+                  <MenuItem fx:id="homeMenuItemClose" mnemonicParsing="false" onAction="#CloseApp" text="Close" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Edit">
+            <items>
+              <MenuItem fx:id="createTask" mnemonicParsing="false" onAction="#addTask" text="Create task" />
+                  <MenuItem fx:id="createUser" mnemonicParsing="false" onAction="#addUser" text="Create user" />
+                  <MenuItem fx:id="createProject" mnemonicParsing="false" onAction="#addProject" text="Create projeck" />
+                  <MenuItem fx:id="delSelected" mnemonicParsing="false" text="Delete selected" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+      <TableView fx:id="homeViewTaskTable" layoutY="103.0" prefHeight="350.0" prefWidth="700.0">
+        <columns>
+          <TableColumn fx:id="homeTableProjectCol" editable="false" prefWidth="114.0" text="Project" />
+          <TableColumn fx:id="homeTableExecutorCol" editable="false" prefWidth="89.0" text="Executor" />
+            <TableColumn fx:id="homeTableTypeCol" editable="false" prefWidth="59.0" text="Type" />
+            <TableColumn fx:id="homeTablePriorityCol" editable="false" prefWidth="47.0" text="Priority" />
+            <TableColumn fx:id="homeTableTopicCol" editable="false" prefWidth="159.0" text="Topic" />
+            <TableColumn fx:id="homeTableDescriptionCol" editable="false" prefWidth="231.0" text="Description" />
+        </columns>
+      </TableView>
+      <TableView fx:id="homeViewAdditionalTable" layoutX="-1.0" layoutY="103.0" prefHeight="351.0" prefWidth="200.0">
+        <columns>
+          <TableColumn fx:id="nameCol" editable="false" prefWidth="75.0" text="Name" />
+        </columns>
+      </TableView>
+      <Button fx:id="showTasksFilteredByButton" layoutX="381.0" layoutY="152.0" mnemonicParsing="false" text="Show all tasks of user" />
+   </children>
+</AnchorPane>

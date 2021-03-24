@@ -1,8 +1,9 @@
 package sample.entity;
 
+import sample.entity.base.AdditionalTable;
 import sample.entity.base.BaseEntity;
 
-public class User extends BaseEntity {
+public class User extends BaseEntity implements AdditionalTable {
     private String name;
     private String login;
     private String password;
@@ -11,6 +12,16 @@ public class User extends BaseEntity {
         this.name = name;
         this.login = login;
         this.password = password;
+    }
+
+    public User(int id, String name, String login, String password) {
+        setId(id);
+        this.name = name;
+        this.login = login;
+        this.password = password;
+    }
+
+    public User() {
     }
 
     public String getName() {

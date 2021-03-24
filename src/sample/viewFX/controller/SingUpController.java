@@ -1,14 +1,15 @@
 package sample.viewFX.controller;
 
 
-import java.net.URL;
-import java.sql.SQLException;
-import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.stage.Window;
 import sample.connectionDB.DataBaseHandler;
 import sample.entity.User;
+
+import java.net.URL;
+import java.util.ResourceBundle;
 
 public class SingUpController {
 
@@ -33,15 +34,25 @@ public class SingUpController {
     @FXML
     void initialize() {
         singUpCreateButton.setOnAction(event -> {
-            try {
-                DataBaseHandler.connect();
-                User user = new User(
-                        singUpLoginField.getText(),
-                        singUpPasswordField.getText(),
-                        singUpNameField.getText());
+            DataBaseHandler.checkAndConnect();
+            User user = new User(
+                    singUpNameField.getText(),
+                    singUpLoginField.getText(),
+                    singUpPasswordField.getText());
+
+            if (user.getLogin() != null &&
+                    user.getPassword() != null &&
+                    user.getName() != null &&
+                    !user.getLogin().isEmpty() &&
+                    !user.getPassword().isEmpty() &&
+                    !user.getName().isEmpty()) {
+
                 DataBaseHandler.createUser(user);
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
+                Window window = singUpCreateButton.getScene().getWindow();
+                ControllerHelper.openNewScene(
+                        ControllerHelper.HOME_VIEW_PATH, window, getClass());
+            } else {
+                System.out.println("Must be entered name, login and password!");
             }
         });
     }

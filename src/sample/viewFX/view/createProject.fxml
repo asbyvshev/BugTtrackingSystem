@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="450.0" prefWidth="700.0" style="-fx-background-color: #2e3348;" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.viewFX.controller.CreateProjectController">
+   <children>
+      <AnchorPane layoutY="103.0" prefHeight="350.0" prefWidth="700.0" style="-fx-background-color: fafafa;">
+         <children>
+            <Button fx:id="createProjectCreateButton" layoutX="323.0" layoutY="235.0" mnemonicParsing="false" style="-fx-background-color: #2e3348;" text="Create" textFill="WHITE">
+               <font>
+                  <Font name="Times New Roman Bold Italic" size="20.0" />
+               </font>
+            </Button>
+            <TextField fx:id="createProjectNameField" layoutX="250.0" layoutY="80.0" prefHeight="37.0" prefWidth="229.0" promptText="Name">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </TextField>
+         </children>
+      </AnchorPane>
+      <Label layoutX="274.0" layoutY="36.0" text="BugTracing" textFill="#f8f4f4">
+         <font>
+            <Font name="Times New Roman" size="36.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>
