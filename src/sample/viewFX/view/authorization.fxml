@@ -10,7 +10,7 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="450.0" prefWidth="700.0" style="-fx-background-color: #2e3348;" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.viewFX.controller.AuthorizationController">
    <children>
-      <AnchorPane layoutY="103.0" prefHeight="350.0" prefWidth="700.0" style="-fx-background-color: fafafa;">
+      <AnchorPane layoutY="100.0" prefHeight="360.0" prefWidth="710.0" style="-fx-background-color: fafafa;">
          <children>
             <Button fx:id="authSingInButton" layoutX="323.0" layoutY="235.0" mnemonicParsing="false" text="SingIn">
                <font>
