@@ -22,4 +22,9 @@ public class Project extends BaseEntity implements AdditionalTable {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

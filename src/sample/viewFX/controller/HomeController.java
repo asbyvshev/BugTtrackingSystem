@@ -16,6 +16,7 @@ import sample.entity.Project;
 import sample.entity.Task;
 import sample.entity.User;
 import sample.entity.base.AdditionalTable;
+import sample.entity.base.BaseEntity;
 import sample.entity.base.Const;
 
 import java.net.URL;
@@ -107,6 +108,38 @@ public class HomeController {
     }
 
     @FXML
+    void removeSelected(ActionEvent event) {
+        String table = null;
+        Integer id = null;
+        TableView tableView = null;
+        ObservableList observableList = null;
+
+        if (filterType.equals(FilterType.USER) || filterType.equals(FilterType.PROJECT)) {
+            table = Const.USERS_TABLE;
+            AdditionalTable selectedItem = homeViewAdditionalTable.getSelectionModel().getSelectedItem();
+            id = selectedItem != null ? selectedItem.getId() : null;
+            tableView = homeViewAdditionalTable;
+            observableList = additionalObservableList;
+            observableList.remove(selectedItem);
+        }
+        if (filterType.equals(FilterType.TASK)) {
+            table = Const.TASKS_TABLE;
+            Task item = homeViewTaskTable.getSelectionModel().getSelectedItem();
+            id = item != null ? item.getId() : null;
+            tableView = homeViewTaskTable;
+            observableList = homeObservableList;
+            observableList.remove(item);
+        }
+        if (id != null) {
+            DataBaseHandler.remove(table, id);
+            tableView.setItems(observableList);
+            tableView.refresh();
+        } else {
+            System.out.println("Select the item to delete!");
+        }
+    }
+
+    @FXML
     void showProjects(ActionEvent event) {
         showTasksFilteredByButton.setText(ControllerHelper.SHOW_ALL_TASKS_BY_PROJECT);
         filterType = FilterType.PROJECT;
@@ -173,16 +206,19 @@ public class HomeController {
     }
 
     private void init() {
+        filterType = FilterType.TASK;
         homeViewTaskTable.setItems(homeObservableList);
         homeViewAdditionalTable.setVisible(false);
         showTasksFilteredByButton.setVisible(false);
         homeViewTaskTable.setVisible(true);
+        homeViewTaskTable.refresh();
     }
 
     private void initAdditional() {
         homeViewTaskTable.setVisible(false);
-        homeViewAdditionalTable.setVisible(true);
         homeViewAdditionalTable.setItems(additionalObservableList);
+        homeViewAdditionalTable.setVisible(true);
         showTasksFilteredByButton.setVisible(true);
+        homeViewAdditionalTable.refresh();
     }
 }

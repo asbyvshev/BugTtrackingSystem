@@ -52,9 +52,9 @@ public class CreateTaskController {
 
     @FXML
     void initialize() {
+        initComboBoxes();
         createTaskCreateButton.setOnAction(event -> {
             DataBaseHandler.checkAndConnect();
-            initComboBoxes();
 
             Task task = new Task(
                     createTaskTopicField.getText(),

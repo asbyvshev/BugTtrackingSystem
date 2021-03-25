@@ -88,7 +88,7 @@ public class DataBaseHandler {
 
     public static void createProject(Project project) {
         String insert = String.format("INSERT INTO '%s'('%s')VALUES(?)",
-                Const.USERS_TABLE, Const.USERS_LOGIN, Const.USERS_PASSWORD, Const.USERS_NAME);
+                Const.PROJECTS_TABLE, Const.PROJECTS_NAME);
         try {
             PreparedStatement prSt = connection.prepareStatement(insert);
             prSt.setString(1, project.getName());
@@ -241,5 +241,17 @@ public class DataBaseHandler {
                 Const.TASKS_PROJECT_ID,
                 String.valueOf(project.getId()));
         return getTasks(resultSet);
+    }
+
+    public static void remove(String table, Integer id) {
+        String insert = String.format("DELETE FROM %s WHERE id=?",
+                table, id);
+        try {
+            PreparedStatement prSt = connection.prepareStatement(insert);
+            prSt.setInt(1, id);
+            prSt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

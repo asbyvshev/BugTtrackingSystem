@@ -32,6 +32,7 @@ public class ControllerHelper {
         Parent root = loader.getRoot();
         Stage stage = new Stage();
         stage.setScene(new Scene(root));
-        stage.showAndWait();
+        stage.show();
+//        stage.showAndWait(); //подвисают окна
     }
 }

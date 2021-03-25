@@ -47,4 +47,9 @@ public class User extends BaseEntity implements AdditionalTable {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

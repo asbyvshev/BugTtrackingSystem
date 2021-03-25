@@ -32,7 +32,7 @@
               <MenuItem fx:id="createTask" mnemonicParsing="false" onAction="#addTask" text="Create task" />
                   <MenuItem fx:id="createUser" mnemonicParsing="false" onAction="#addUser" text="Create user" />
                   <MenuItem fx:id="createProject" mnemonicParsing="false" onAction="#addProject" text="Create projeck" />
-                  <MenuItem fx:id="delSelected" mnemonicParsing="false" text="Delete selected" />
+                  <MenuItem fx:id="delSelected" mnemonicParsing="false" onAction="#removeSelected" text="Delete selected" />
             </items>
           </Menu>
         </menus>
@@ -49,7 +49,7 @@
       </TableView>
       <TableView fx:id="homeViewAdditionalTable" layoutX="-1.0" layoutY="103.0" prefHeight="351.0" prefWidth="200.0">
         <columns>
-          <TableColumn fx:id="nameCol" editable="false" prefWidth="75.0" text="Name" />
+          <TableColumn fx:id="nameCol" editable="false" prefWidth="199.0" text="Name" />
         </columns>
       </TableView>
       <Button fx:id="showTasksFilteredByButton" layoutX="381.0" layoutY="152.0" mnemonicParsing="false" text="Show all tasks of user" />
