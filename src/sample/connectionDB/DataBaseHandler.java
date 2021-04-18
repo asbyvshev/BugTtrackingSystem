@@ -1,11 +1,17 @@
 package sample.connectionDB;
 
+import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.VBox;
 import sample.entity.Project;
 import sample.entity.Task;
 import sample.entity.User;
 import sample.entity.base.Const;
 import sample.entity.base.TaskType;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -71,6 +77,7 @@ public class DataBaseHandler {
             }
             stmt.executeBatch();
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
     }
@@ -86,6 +93,7 @@ public class DataBaseHandler {
             connection = DriverManager.getConnection(DB_URL.concat(dbName));
             stmt = connection.createStatement();
         } catch (ClassNotFoundException e) {
+            showDBError(e);
             e.printStackTrace();
         }
     }
@@ -96,6 +104,7 @@ public class DataBaseHandler {
                 connection.close();
             }
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
     }
@@ -105,6 +114,7 @@ public class DataBaseHandler {
             try {
                 connect();
             } catch (SQLException e) {
+                showDBError(e);
                 e.printStackTrace();
             }
         }
@@ -120,6 +130,7 @@ public class DataBaseHandler {
             prSt.setString(3, user.getName());
             prSt.executeUpdate();
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
     }
@@ -141,6 +152,7 @@ public class DataBaseHandler {
             prSt.setInt(6, task.getExecutor().getId());
             prSt.executeUpdate();
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
     }
@@ -153,6 +165,7 @@ public class DataBaseHandler {
             prSt.setString(1, project.getName());
             prSt.executeUpdate();
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
     }
@@ -168,6 +181,7 @@ public class DataBaseHandler {
             prSt.setString(2, user.getPassword());
             resultSet = prSt.executeQuery();
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
         return resultSet;
@@ -179,6 +193,7 @@ public class DataBaseHandler {
         try {
             resultSet = stmt.executeQuery(select);
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
         return resultSet;
@@ -194,6 +209,7 @@ public class DataBaseHandler {
             prSt.setString(1, value);
             resultSet = prSt.executeQuery();
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
         return resultSet;
@@ -216,6 +232,7 @@ public class DataBaseHandler {
                 users.add(user);
             }
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
         return users;
@@ -246,6 +263,7 @@ public class DataBaseHandler {
                 projects.add(project);
             }
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
         return projects;
@@ -281,6 +299,7 @@ public class DataBaseHandler {
                 tasks.add(task);
             }
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
         return tasks;
@@ -310,7 +329,36 @@ public class DataBaseHandler {
             prSt.setInt(1, id);
             prSt.executeUpdate();
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
+    }
+
+    public void showDBError(Exception e) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Data Base");
+        alert.setHeaderText(e.getMessage());
+
+        VBox dialogPaneContent = new VBox();
+        Label label = new Label("Stack Trace:");
+
+        String stackTrace = getStackTrace(e);
+        TextArea textArea = new TextArea();
+        textArea.setText(stackTrace);
+
+        dialogPaneContent.getChildren().addAll(label, textArea);
+
+        // Set content for Dialog Pane
+        alert.getDialogPane().setContent(dialogPaneContent);
+
+        alert.showAndWait();
+    }
+
+    private String getStackTrace(Exception e) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        String s = sw.toString();
+        return s;
     }
 }

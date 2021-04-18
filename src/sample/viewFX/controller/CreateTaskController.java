@@ -3,6 +3,7 @@ package sample.viewFX.controller;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
@@ -61,7 +62,13 @@ public class CreateTaskController {
                 Window window = createTaskCreateButton.getScene().getWindow();
                 ControllerHelper.openNewScene(
                         ControllerHelper.HOME_VIEW_PATH, window, getClass());
+                System.out.println("Created new task: " + task.getId());
             } else {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Create task");
+                alert.setContentText("Must be entered project and executor!");
+                alert.setHeaderText(null);
+                alert.showAndWait();
                 System.out.println("Must be entered project and executor!");
             }
         });

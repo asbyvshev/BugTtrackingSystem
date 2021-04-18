@@ -2,6 +2,7 @@ package sample.viewFX.controller;
 
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Window;
@@ -43,7 +44,13 @@ public class SingUpController {
                 Window window = singUpCreateButton.getScene().getWindow();
                 ControllerHelper.openNewScene(
                         ControllerHelper.HOME_VIEW_PATH, window, getClass());
+                System.out.println("Created new user: " + user.getName());
             } else {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("SingUp");
+                alert.setContentText("Must be entered name, login and password!");
+                alert.setHeaderText(null);
+                alert.showAndWait();
                 System.out.println("Must be entered name, login and password!");
             }
         });

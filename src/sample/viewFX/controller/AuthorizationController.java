@@ -2,6 +2,7 @@ package sample.viewFX.controller;
 
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -36,7 +37,8 @@ public class AuthorizationController {
                     !loginText.isEmpty() && !passwordText.isEmpty()) {
                 loginUser(loginText, passwordText);
             } else {
-                System.out.println("Login or password is empty");
+                authAlert("Login or password is empty");
+//                System.out.println("Login or password is empty");
             }
         });
 
@@ -44,6 +46,14 @@ public class AuthorizationController {
             Window window = authSingUpButton.getScene().getWindow();
             ControllerHelper.openNewScene(ControllerHelper.SING_UP_VIEW_PATH, window, getClass());
         });
+    }
+
+    private void authAlert(String msg) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Authorization");
+        alert.setContentText(msg);
+        alert.setHeaderText(null);
+        alert.showAndWait();
     }
 
     private void loginUser(String loginText, String passwordText) {
@@ -61,6 +71,7 @@ public class AuthorizationController {
                 counter++;
             }
         } catch (SQLException e) {
+            handler.showDBError(e);
             e.printStackTrace();
         }
 
@@ -69,6 +80,7 @@ public class AuthorizationController {
             ControllerHelper.openNewScene(ControllerHelper.HOME_VIEW_PATH, window, getClass());
             System.out.println("Success!");
         } else {
+            authAlert("User not found!");
             System.out.println("User not found!");
         }
     }
