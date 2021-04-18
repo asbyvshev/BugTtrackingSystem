@@ -33,6 +33,5 @@ public class ControllerHelper {
         Stage stage = new Stage();
         stage.setScene(new Scene(root));
         stage.show();
-//        stage.showAndWait(); //подвисают окна
     }
 }

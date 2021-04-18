@@ -1,8 +1,5 @@
 package sample.viewFX.controller;
 
-import java.net.URL;
-import java.util.ResourceBundle;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -18,12 +15,6 @@ import sample.entity.User;
 import sample.entity.base.TaskType;
 
 public class CreateTaskController {
-
-    @FXML
-    private ResourceBundle resources;
-
-    @FXML
-    private URL location;
 
     @FXML
     private Button createTaskCreateButton;
@@ -54,7 +45,8 @@ public class CreateTaskController {
     void initialize() {
         initComboBoxes();
         createTaskCreateButton.setOnAction(event -> {
-            DataBaseHandler.checkAndConnect();
+            DataBaseHandler handler = DataBaseHandler.getInstance();
+            handler.checkAndConnect();
 
             Task task = new Task(
                     createTaskTopicField.getText(),
@@ -65,7 +57,7 @@ public class CreateTaskController {
                     createTaskTypeComboBox.getSelectionModel().getSelectedItem());
 
             if (task.getProject() != null && task.getExecutor() != null) {
-                DataBaseHandler.createTask(task);
+                handler.createTask(task);
                 Window window = createTaskCreateButton.getScene().getWindow();
                 ControllerHelper.openNewScene(
                         ControllerHelper.HOME_VIEW_PATH, window, getClass());
@@ -76,9 +68,10 @@ public class CreateTaskController {
     }
 
     private void initComboBoxes() {
-        DataBaseHandler.checkAndConnect();
-        projects.addAll(DataBaseHandler.getAllProjects());
-        users.addAll(DataBaseHandler.getAllUsers());
+        DataBaseHandler handler = DataBaseHandler.getInstance();
+        handler.checkAndConnect();
+        projects.addAll(handler.getAllProjects());
+        users.addAll(handler.getAllUsers());
         types.addAll(TaskType.values());
         createTaskProjectComboBox.setItems(projects);
         createTaskExecutorComboBox.setItems(users);

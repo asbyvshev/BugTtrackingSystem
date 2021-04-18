@@ -9,18 +9,10 @@ import javafx.stage.Window;
 import sample.connectionDB.DataBaseHandler;
 import sample.entity.User;
 
-import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ResourceBundle;
 
 public class AuthorizationController {
-
-    @FXML
-    private ResourceBundle resources;
-
-    @FXML
-    private URL location;
 
     @FXML
     private Button authSingInButton;
@@ -36,7 +28,6 @@ public class AuthorizationController {
 
     @FXML
     void initialize() {
-        DataBaseHandler.checkAndConnect();
         authSingInButton.setOnAction(event -> {
             String loginText = authLoginField.getText().trim();
             String passwordText = authPasswordField.getText().trim();
@@ -56,10 +47,12 @@ public class AuthorizationController {
     }
 
     private void loginUser(String loginText, String passwordText) {
+        DataBaseHandler handler = DataBaseHandler.getInstance();
+        handler.checkAndConnect();
         User user = new User();
         user.setLogin(loginText);
         user.setPassword(passwordText);
-        ResultSet result = DataBaseHandler.getUserAuth(user);
+        ResultSet result = handler.getUserAuth(user);
 
         int counter = 0;
 

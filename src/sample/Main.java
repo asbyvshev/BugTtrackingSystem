@@ -5,11 +5,15 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import sample.connectionDB.DataBaseHandler;
 
 public class Main extends Application {
 
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage primaryStage) throws Exception {
+        DataBaseHandler dbHandler = DataBaseHandler.getInstance();
+        dbHandler.connect();
+        dbHandler.createDB();
         Parent root = FXMLLoader.load(getClass().getResource("viewFX/view/authorization.fxml"));
         primaryStage.setTitle("BugTracing");
         primaryStage.setFullScreen(false);
