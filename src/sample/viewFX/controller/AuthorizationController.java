@@ -2,6 +2,7 @@ package sample.viewFX.controller;
 
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -9,18 +10,10 @@ import javafx.stage.Window;
 import sample.connectionDB.DataBaseHandler;
 import sample.entity.User;
 
-import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ResourceBundle;
 
 public class AuthorizationController {
-
-    @FXML
-    private ResourceBundle resources;
-
-    @FXML
-    private URL location;
 
     @FXML
     private Button authSingInButton;
@@ -36,7 +29,6 @@ public class AuthorizationController {
 
     @FXML
     void initialize() {
-        DataBaseHandler.checkAndConnect();
         authSingInButton.setOnAction(event -> {
             String loginText = authLoginField.getText().trim();
             String passwordText = authPasswordField.getText().trim();
@@ -45,7 +37,8 @@ public class AuthorizationController {
                     !loginText.isEmpty() && !passwordText.isEmpty()) {
                 loginUser(loginText, passwordText);
             } else {
-                System.out.println("Login or password is empty");
+                authAlert("Login or password is empty");
+//                System.out.println("Login or password is empty");
             }
         });
 
@@ -55,11 +48,21 @@ public class AuthorizationController {
         });
     }
 
+    private void authAlert(String msg) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Authorization");
+        alert.setContentText(msg);
+        alert.setHeaderText(null);
+        alert.showAndWait();
+    }
+
     private void loginUser(String loginText, String passwordText) {
+        DataBaseHandler handler = DataBaseHandler.getInstance();
+        handler.checkAndConnect();
         User user = new User();
         user.setLogin(loginText);
         user.setPassword(passwordText);
-        ResultSet result = DataBaseHandler.getUserAuth(user);
+        ResultSet result = handler.getUserAuth(user);
 
         int counter = 0;
 
@@ -68,6 +71,7 @@ public class AuthorizationController {
                 counter++;
             }
         } catch (SQLException e) {
+            handler.showDBError(e);
             e.printStackTrace();
         }
 
@@ -76,6 +80,7 @@ public class AuthorizationController {
             ControllerHelper.openNewScene(ControllerHelper.HOME_VIEW_PATH, window, getClass());
             System.out.println("Success!");
         } else {
+            authAlert("User not found!");
             System.out.println("User not found!");
         }
     }

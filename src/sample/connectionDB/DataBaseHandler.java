@@ -1,11 +1,17 @@
 package sample.connectionDB;
 
+import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.VBox;
 import sample.entity.Project;
 import sample.entity.Task;
 import sample.entity.User;
 import sample.entity.base.Const;
 import sample.entity.base.TaskType;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -13,45 +19,108 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class DataBaseHandler {
-    private static Connection connection;
-    private static Statement stmt;
     private static final String DRIVER = "org.sqlite.JDBC";
-    private static final String DB_URL = "jdbc:sqlite:BugTtrackingSystemDB.db";
+    private static final String DB_URL = "jdbc:sqlite:";
+    private static DataBaseHandler instance;
+    private String dbName = "BugTtrackingSystemDB.db";
+    private Connection connection;
+    private Statement stmt;
 
-    public static void connect() throws SQLException {
+    private DataBaseHandler() {
+    }
+
+    public static synchronized DataBaseHandler getInstance() {
+        if (instance == null) {
+            instance = new DataBaseHandler();
+        }
+
+        return instance;
+    }
+
+    public void createDB() {
+        LinkedHashSet<String> createBatches = new LinkedHashSet();
+        String createUserTable = String.format("CREATE TABLE if not exists '%s'" +
+                        " ('%s' %s, '%s' %s %s, '%s' %s, '%s' %s);",
+                Const.USERS_TABLE, Const.USERS_ID, Const.DB_TYPE_INT_PRIMARY_KEY_AUTOINC,
+                Const.USERS_LOGIN, Const.DB_TYPE_TEXT, Const.DB_TYPE_UNIQUE,
+                Const.USERS_PASSWORD, Const.DB_TYPE_TEXT,
+                Const.USERS_NAME, Const.DB_TYPE_TEXT);
+        createBatches.add(createUserTable);
+
+        String createProjectTable = String.format("CREATE TABLE if not exists '%s'" +
+                        " ('%s' %s, '%s' %s);",
+                Const.PROJECTS_TABLE, Const.PROJECTS_ID, Const.DB_TYPE_INT_PRIMARY_KEY_AUTOINC,
+                Const.PROJECTS_NAME, Const.DB_TYPE_TEXT);
+        createBatches.add(createProjectTable);
+
+        String createTaskTable = String.format("CREATE TABLE if not exists '%s'" +
+                        " ('%s' %s, '%s' %s, '%s' %s, '%s' %s, '%s' %s," +
+                        " '%s' %s, '%s' %s);",
+                Const.TASKS_TABLE, Const.TASKS_ID, Const.DB_TYPE_INT_PRIMARY_KEY_AUTOINC,
+                Const.TASKS_TOPIC, Const.DB_TYPE_TEXT,
+                Const.TASKS_DESCRIPTION, Const.DB_TYPE_TEXT,
+                Const.TASKS_PRIORITY, Const.DB_TYPE_INT,
+                Const.TASKS_TYPE, Const.DB_TYPE_TEXT,
+                Const.TASKS_PROJECT_ID, getDBTypeIntRef(Const.PROJECTS_TABLE),
+                Const.TASKS_USER_ID, getDBTypeIntRef(Const.USERS_TABLE));
+        createBatches.add(createTaskTable);
+
         try {
-            Class.forName(DRIVER);
-            connection = DriverManager.getConnection(DB_URL);
-            stmt = connection.createStatement();
-        } catch (ClassNotFoundException e) {
+            for (String batch : createBatches) {
+                stmt.addBatch(batch);
+            }
+            stmt.executeBatch();
+        } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
     }
 
-    public static void disconnect() {
+    private String getDBTypeIntRef(String table) {
+        return String.format("%s %s %s (id)",
+                Const.DB_TYPE_INT, Const.DB_TYPE_REF, table);
+    }
+
+    public void connect() throws SQLException {
+        try {
+            Class.forName(DRIVER);
+            connection = DriverManager.getConnection(DB_URL.concat(dbName));
+            stmt = connection.createStatement();
+        } catch (ClassNotFoundException e) {
+            showDBError(e);
+            e.printStackTrace();
+        }
+    }
+
+    public void disconnect() {
         try {
             if (connection != null) {
                 connection.close();
             }
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
     }
 
-    public static void checkAndConnect() {
+    public void checkAndConnect() {
         if (connection == null) {
             try {
                 connect();
             } catch (SQLException e) {
+                showDBError(e);
                 e.printStackTrace();
             }
         }
     }
 
-    public static void createUser(User user) {
+    public void createUser(User user) {
         String insert = String.format("INSERT INTO '%s'('%s','%s','%s')VALUES(?,?,?)",
                 Const.USERS_TABLE, Const.USERS_LOGIN, Const.USERS_PASSWORD, Const.USERS_NAME);
         try {
@@ -61,16 +130,17 @@ public class DataBaseHandler {
             prSt.setString(3, user.getName());
             prSt.executeUpdate();
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
     }
 
-    public static void createTask(Task task) {
+    public void createTask(Task task) {
         String insert = String.format(
                 "INSERT INTO '%s'('%s','%s','%s','%s','%s','%s')VALUES(?,?,?,?,?,?)",
                 Const.TASKS_TABLE, Const.TASKS_DESCRIPTION,
                 Const.TASKS_TYPE, Const.TASKS_PRIORITY,
-                Const.TASKS_TOPIC,  Const.TASKS_PROJECT_ID,
+                Const.TASKS_TOPIC, Const.TASKS_PROJECT_ID,
                 Const.TASKS_USER_ID);
         try {
             PreparedStatement prSt = connection.prepareStatement(insert);
@@ -82,11 +152,12 @@ public class DataBaseHandler {
             prSt.setInt(6, task.getExecutor().getId());
             prSt.executeUpdate();
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
     }
 
-    public static void createProject(Project project) {
+    public void createProject(Project project) {
         String insert = String.format("INSERT INTO '%s'('%s')VALUES(?)",
                 Const.PROJECTS_TABLE, Const.PROJECTS_NAME);
         try {
@@ -94,59 +165,63 @@ public class DataBaseHandler {
             prSt.setString(1, project.getName());
             prSt.executeUpdate();
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
     }
 
-    public static ResultSet getUserAuth(User user) {
+    public ResultSet getUserAuth(User user) {
         ResultSet resultSet = null;
         String select = String.format("SELECT * FROM %s WHERE %s=? AND %s=?",
                 Const.USERS_TABLE, Const.USERS_LOGIN, Const.USERS_PASSWORD);
-        PreparedStatement prSt = null;
+        PreparedStatement prSt;
         try {
             prSt = connection.prepareStatement(select);
             prSt.setString(1, user.getLogin());
             prSt.setString(2, user.getPassword());
             resultSet = prSt.executeQuery();
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
         return resultSet;
     }
 
-    private static ResultSet getAllItems(String table) {
+    private ResultSet getAllItems(String table) {
         ResultSet resultSet = null;
         String select = String.format("SELECT * FROM %s", table);
         try {
             resultSet = stmt.executeQuery(select);
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
         return resultSet;
     }
 
-    private static ResultSet getItemsBy(String table, String column, String value) {
+    private ResultSet getItemsBy(String table, String column, String value) {
         ResultSet resultSet = null;
         String select = String.format("SELECT * FROM %s WHERE %s=?",
                 table, column);
-        PreparedStatement prSt = null;
+        PreparedStatement prSt;
         try {
             prSt = connection.prepareStatement(select);
             prSt.setString(1, value);
             resultSet = prSt.executeQuery();
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
         return resultSet;
     }
 
-    public static List<User> getAllUsers() {
+    public Set<User> getAllUsers() {
         ResultSet items = getAllItems(Const.USERS_TABLE);
         return getUsers(items);
     }
 
-    private static List<User> getUsers(ResultSet items) {
-        List<User> users = new ArrayList<>();
+    private Set<User> getUsers(ResultSet items) {
+        Set<User> users = new HashSet<>();
         try {
             while (items.next()) {
                 User user = new User(
@@ -157,27 +232,28 @@ public class DataBaseHandler {
                 users.add(user);
             }
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
         return users;
     }
 
-    public static User getUserById(String id) {
+    public User getUserById(String id) {
         ResultSet items = getItemsBy(Const.USERS_TABLE, Const.USERS_ID, id);
-        return getUsers(items).get(0);
+        return getUsers(items).stream().findFirst().orElse(null);
     }
 
-    public static List<Project> getAllProjects() {
+    public List<Project> getAllProjects() {
         ResultSet items = getAllItems(Const.PROJECTS_TABLE);
         return getProjects(items);
     }
 
-    public static Project getProjectById(String id) {
+    public Project getProjectById(String id) {
         ResultSet items = getItemsBy(Const.PROJECTS_TABLE, Const.PROJECTS_ID, id);
-        return getProjects(items).get(0);
+        return getProjects(items).stream().findFirst().orElse(null);
     }
 
-    private static List<Project> getProjects(ResultSet items) {
+    private List<Project> getProjects(ResultSet items) {
         List<Project> projects = new ArrayList<>();
         try {
             while (items.next()) {
@@ -187,17 +263,18 @@ public class DataBaseHandler {
                 projects.add(project);
             }
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
         return projects;
     }
 
-    public static List<Task> getAllTasks() {
+    public List<Task> getAllTasks() {
         ResultSet items = getAllItems(Const.TASKS_TABLE);
         return getTasks(items);
     }
 
-    private static List<Task> getTasks(ResultSet items) {
+    private List<Task> getTasks(ResultSet items) {
         List<Task> tasks = new ArrayList<>();
         try {
             while (items.next()) {
@@ -222,12 +299,13 @@ public class DataBaseHandler {
                 tasks.add(task);
             }
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
         return tasks;
     }
 
-    public static List<Task> getTasksByUser(User user) {
+    public List<Task> getTasksByUser(User user) {
         ResultSet resultSet = getItemsBy(
                 Const.TASKS_TABLE,
                 Const.TASKS_USER_ID,
@@ -235,7 +313,7 @@ public class DataBaseHandler {
         return getTasks(resultSet);
     }
 
-    public static List<Task> getTasksByProject(Project project) {
+    public List<Task> getTasksByProject(Project project) {
         ResultSet resultSet = getItemsBy(
                 Const.TASKS_TABLE,
                 Const.TASKS_PROJECT_ID,
@@ -243,15 +321,44 @@ public class DataBaseHandler {
         return getTasks(resultSet);
     }
 
-    public static void remove(String table, Integer id) {
+    public void remove(String table, Integer id) {
         String insert = String.format("DELETE FROM %s WHERE id=?",
-                table, id);
+                table);
         try {
             PreparedStatement prSt = connection.prepareStatement(insert);
             prSt.setInt(1, id);
             prSt.executeUpdate();
         } catch (SQLException e) {
+            showDBError(e);
             e.printStackTrace();
         }
+    }
+
+    public void showDBError(Exception e) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Data Base");
+        alert.setHeaderText(e.getMessage());
+
+        VBox dialogPaneContent = new VBox();
+        Label label = new Label("Stack Trace:");
+
+        String stackTrace = getStackTrace(e);
+        TextArea textArea = new TextArea();
+        textArea.setText(stackTrace);
+
+        dialogPaneContent.getChildren().addAll(label, textArea);
+
+        // Set content for Dialog Pane
+        alert.getDialogPane().setContent(dialogPaneContent);
+
+        alert.showAndWait();
+    }
+
+    private String getStackTrace(Exception e) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        String s = sw.toString();
+        return s;
     }
 }

@@ -23,4 +23,10 @@ public class Const {
     public static final String TASKS_PROJECT_ID = "project_id";
     public static final String TASKS_USER_ID = "user_id";
     public static final String TASKS_PRIORITY = "priority";
+
+    public static final String DB_TYPE_INT_PRIMARY_KEY_AUTOINC = "INTEGER PRIMARY KEY AUTOINCREMENT";
+    public static final String DB_TYPE_REF = "REFERENCES";
+    public static final String DB_TYPE_INT = "INTEGER";
+    public static final String DB_TYPE_TEXT = "TEXT";
+    public static final String DB_TYPE_UNIQUE = "UNIQUE";
 }

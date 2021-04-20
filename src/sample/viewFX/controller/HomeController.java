@@ -6,7 +6,6 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -16,43 +15,9 @@ import sample.entity.Project;
 import sample.entity.Task;
 import sample.entity.User;
 import sample.entity.base.AdditionalTable;
-import sample.entity.base.BaseEntity;
 import sample.entity.base.Const;
 
-import java.net.URL;
-import java.util.ResourceBundle;
-
 public class HomeController {
-
-    @FXML
-    private ResourceBundle resources;
-
-    @FXML
-    private URL location;
-
-    @FXML
-    private MenuItem homeMenuItemUsers;
-
-    @FXML
-    private MenuItem homeMenuItemProject;
-
-    @FXML
-    private MenuItem homeMenuItemTasks;
-
-    @FXML
-    private MenuItem homeMenuItemClose;
-
-    @FXML
-    private MenuItem createTask;
-
-    @FXML
-    private MenuItem createUser;
-
-    @FXML
-    private MenuItem createProject;
-
-    @FXML
-    private MenuItem delSelected;
 
     @FXML
     private TableView<Task> homeViewTaskTable;
@@ -86,8 +51,46 @@ public class HomeController {
 
     private FilterType filterType;
 
-    private ObservableList<AdditionalTable> additionalObservableList = FXCollections.observableArrayList();
-    private ObservableList<Task> homeObservableList = FXCollections.observableArrayList();
+    private final ObservableList<AdditionalTable> additionalObservableList = FXCollections.observableArrayList();
+
+    private final ObservableList<Task> homeObservableList = FXCollections.observableArrayList();
+
+    private DataBaseHandler handler;
+
+    @FXML
+    void initialize() {
+        handler = DataBaseHandler.getInstance();
+        nameCol.setCellValueFactory(new PropertyValueFactory<>(Const.NAME));
+        homeTableProjectCol.setCellValueFactory(new PropertyValueFactory<>(Const.PROJECT));
+        homeTableExecutorCol.setCellValueFactory(new PropertyValueFactory<>(Const.EXECUTOR));
+        homeTableTypeCol.setCellValueFactory(new PropertyValueFactory<>(Const.TASKS_TYPE));
+        homeTablePriorityCol.setCellValueFactory(new PropertyValueFactory<>(Const.TASKS_PRIORITY));
+        homeTableTopicCol.setCellValueFactory(new PropertyValueFactory<>(Const.TASKS_TOPIC));
+        homeTableDescriptionCol.setCellValueFactory(new PropertyValueFactory<>(Const.TASKS_DESCRIPTION));
+        homeObservableList.addAll(handler.getAllTasks());
+
+        init();
+        showTasksFilteredByButton.setOnAction(event -> {
+            homeObservableList.clear();
+            AdditionalTable selectItem = homeViewAdditionalTable.getSelectionModel().getSelectedItem();
+            if (selectItem != null) {
+                switch (filterType) {
+                    case PROJECT:
+                        Project project = (Project) selectItem;
+                        homeObservableList.addAll(handler.getTasksByProject(project));
+                        break;
+                    case USER:
+                        User user = (User) selectItem;
+                        homeObservableList.addAll(handler.getTasksByUser(user));
+                        break;
+                }
+            } else {
+                homeObservableList.addAll(handler.getAllTasks());
+            }
+            homeViewTaskTable.setItems(homeObservableList);
+            init();
+        });
+    }
 
     @FXML
     void addProject(ActionEvent event) {
@@ -109,29 +112,28 @@ public class HomeController {
 
     @FXML
     void removeSelected(ActionEvent event) {
-        String table = null;
-        Integer id = null;
-        TableView tableView = null;
-        ObservableList observableList = null;
+        String table;
+        Integer id;
+        TableView tableView;
+        ObservableList observableList;
 
-        if (filterType.equals(FilterType.USER) || filterType.equals(FilterType.PROJECT)) {
-            table = Const.USERS_TABLE;
-            AdditionalTable selectedItem = homeViewAdditionalTable.getSelectionModel().getSelectedItem();
-            id = selectedItem != null ? selectedItem.getId() : null;
-            tableView = homeViewAdditionalTable;
-            observableList = additionalObservableList;
-            observableList.remove(selectedItem);
-        }
-        if (filterType.equals(FilterType.TASK)) {
+        if (filterType != null && filterType.equals(FilterType.TASK)) {
             table = Const.TASKS_TABLE;
             Task item = homeViewTaskTable.getSelectionModel().getSelectedItem();
             id = item != null ? item.getId() : null;
             tableView = homeViewTaskTable;
             observableList = homeObservableList;
             observableList.remove(item);
+        } else {
+            AdditionalTable selectedItem = homeViewAdditionalTable.getSelectionModel().getSelectedItem();
+            id = selectedItem != null ? selectedItem.getId() : null;
+            tableView = homeViewAdditionalTable;
+            observableList = additionalObservableList;
+            observableList.remove(selectedItem);
+            table = filterType.equals(FilterType.USER) ? Const.USERS_TABLE : Const.PROJECTS_TABLE;
         }
         if (id != null) {
-            DataBaseHandler.remove(table, id);
+            handler.remove(table, id);
             tableView.setItems(observableList);
             tableView.refresh();
         } else {
@@ -144,14 +146,14 @@ public class HomeController {
         showTasksFilteredByButton.setText(ControllerHelper.SHOW_ALL_TASKS_BY_PROJECT);
         filterType = FilterType.PROJECT;
         additionalObservableList.clear();
-        additionalObservableList.addAll(DataBaseHandler.getAllProjects());
+        additionalObservableList.addAll(handler.getAllProjects());
         initAdditional();
     }
 
     @FXML
     void showTasks(ActionEvent event) {
         homeObservableList.clear();
-        homeObservableList.addAll(DataBaseHandler.getAllTasks());
+        homeObservableList.addAll(handler.getAllTasks());
         init();
     }
 
@@ -160,49 +162,15 @@ public class HomeController {
         showTasksFilteredByButton.setText(ControllerHelper.SHOW_ALL_TASKS_OF_USER);
         filterType = FilterType.USER;
         additionalObservableList.clear();
-        additionalObservableList.addAll(DataBaseHandler.getAllUsers());
+        additionalObservableList.addAll(handler.getAllUsers());
         initAdditional();
     }
 
     @FXML
     void CloseApp(ActionEvent event) {
-        DataBaseHandler.disconnect();
+        handler.disconnect();
         Platform.exit();
         System.exit(0);
-    }
-
-    @FXML
-    void initialize() {
-        nameCol.setCellValueFactory(new PropertyValueFactory<>(Const.NAME));
-        homeTableProjectCol.setCellValueFactory(new PropertyValueFactory<>(Const.PROJECT));
-        homeTableExecutorCol.setCellValueFactory(new PropertyValueFactory<>(Const.EXECUTOR));
-        homeTableTypeCol.setCellValueFactory(new PropertyValueFactory<>(Const.TASKS_TYPE));
-        homeTablePriorityCol.setCellValueFactory(new PropertyValueFactory<>(Const.TASKS_PRIORITY));
-        homeTableTopicCol.setCellValueFactory(new PropertyValueFactory<>(Const.TASKS_TOPIC));
-        homeTableDescriptionCol.setCellValueFactory(new PropertyValueFactory<>(Const.TASKS_DESCRIPTION));
-        homeObservableList.addAll(DataBaseHandler.getAllTasks());
-
-        init();
-        showTasksFilteredByButton.setOnAction(event -> {
-            homeObservableList.clear();
-            AdditionalTable selectItem = homeViewAdditionalTable.getSelectionModel().getSelectedItem();
-            if (selectItem != null) {
-                switch (filterType) {
-                    case PROJECT:
-                        Project project = (Project) selectItem;
-                        homeObservableList.addAll(DataBaseHandler.getTasksByProject(project));
-                        break;
-                    case USER:
-                        User user = (User) selectItem;
-                        homeObservableList.addAll(DataBaseHandler.getTasksByUser(user));
-                        break;
-                }
-            } else {
-                homeObservableList.addAll(DataBaseHandler.getAllTasks());
-            }
-            homeViewTaskTable.setItems(homeObservableList);
-            init();
-        });
     }
 
     private void init() {
